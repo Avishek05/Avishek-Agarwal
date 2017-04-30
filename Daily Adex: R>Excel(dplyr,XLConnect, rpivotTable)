@@ -1,0 +1,31 @@
+setwd("C:\\Users\\avisheka\\Desktop\\dailyadex")
+# set working directory to a folder in dekstop(dailyadex in here)
+#use"\\" instead of"\"
+library(XLConnect)
+#package to read excel sheets selectively
+library(dplyr)
+#package to work/maipulate excel
+filename<-loadWorkbook("Factual_Entertainment_24042017_244.xlsx")
+#load excel
+filename<-readWorksheet(filename, sheet = 1, startRow = 6, drop=c(3,4,5,6,7,8,9,10,11,15,16,17,19))
+#read excel(selctive columsn only)
+filename<-filename[filename$BRAND.CATG!="SHORT PROGRAM" & filename$BRAND.CATG!="PROMO TAG",]
+#remove rows with certain values
+filename$MAIN<-paste(filename$COMPANY,filename$CHNLNAME,sep="")#add temporary column for inhouse
+inhouse<-loadWorkbook("inhouse.xlsx")#load inhouse master
+inhouse<-readWorksheet(inhouse,sheet="Sheet1",startRow=1,startCol=4)#read inhouse
+filename<-left_join(filename,inhouse,by="MAIN")#vlookup for inhouse by Main
+filename<-filename[is.na(filename$Value),]#remove inhouse
+filename<-select(filename,-(MAIN:Value))
+filename<-mutate(filename,COMPANYNEW=gsub(" ","",COMPANY))#create temp advertiser column to remove space
+region<-loadWorkbook("regionmaster.xlsx")#loadworkbook
+region<-readWorksheet(region,sheet="Region_Unique")#read region
+filename<-left_join(filename,region,by="COMPANYNEW")#vlookup for inhouse by Main
+filename<-select(filename,-(COMPANYNEW))#deelte column
+filename<-filename[!(filename$COMPANY%in%c("TELEBRANDS","UNSP-TELE SHOPPING","HBN INDIA PVT LTD")),]#delete rows with certain value
+dailysalesindex<-loadWorkbook("dailysalesindex.xlsx",create=T)#create xlsx file
+createSheet(dailysalesindex,name="factual")#create sheet
+writeWorksheet(dailysalesindex, filename, sheet = "factual", startRow = 1, startCol = 1)#export df to xlsx
+saveWorkbook(dailysalesindex)#save sile
+library("rpivottable")# include pivot
+pivot<-rpivotTable(filename,rows=c("COMPANY","BRAND.NAME","BRAND.CATG","Region"),cols = c("CHNLNAME"),aggregatorName = "Sum",vals="DURATION")
