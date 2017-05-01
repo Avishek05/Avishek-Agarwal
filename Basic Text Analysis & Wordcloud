@@ -1,0 +1,40 @@
+cname <- file.path("C:","Users","avisheka", "Desktop","rdir","texts")
+#save text(.txt) files in a folder and set path
+library(tm)#load text mining package
+docs <- Corpus(DirSource(cname))#load tex files in folder to R
+docs <- tm_map(docs, removePunctuation)#remove punchuation
+for(j in seq(docs))   
+   {   
+     docs[[j]] <- gsub("/", " ", docs[[j]])   
+     docs[[j]] <- gsub("@", " ", docs[[j]])   
+     docs[[j]] <- gsub("\\|", " ", docs[[j]])   
+  }  #remove special characters
+docs <- tm_map(docs, removeNumbers)#remove numbers
+docs <- tm_map(docs, tolower)#convert to lower case
+docs <- tm_map(docs, removeWords, stopwords("english"))#remove common words
+docs <- tm_map(docs, removeWords, c("department", "email")) #unimportant words
+for (j in seq(docs))
+{
+docs[[j]] <- gsub("qualitative research", "qualitative_research", docs[[j]])
+docs[[j]] <- gsub("qualitative studies", "QDA", docs[[j]])
+docs[[j]] <- gsub("qualitative analysis", "QDA", docs[[j]])
+docs[[j]] <- gsub("research methods", "research_methods", docs[[j]])
+}#combining two words
+docs <- tm_map(docs, PlainTextDocument)
+library(SnowballC) 
+docs_st <- tm_map(docs, stemDocument)#temove common endings may skip it
+docs <- tm_map(docs, stripWhitespace) #remove extra space created by earlier exercise
+docs <- tm_map(docs, PlainTextDocument)#convert into plain text
+dtm <- DocumentTermMatrix(docs)#store in matrix
+tdm <- TermDocumentMatrix(docs)#inverse matrix
+freq <- colSums(as.matrix(dtm),decreasing=T)#sum of words   
+length(freq)#total no. of words
+ord <- order(freq)#sort as per freq
+m <- as.matrix(dtm)#save in excel
+ dim(m)   
+ write.csv(m, file="dtm.csv")  
+inspect(dtm)
+freq[head(ord)]#top words
+set.seed(100)#center to reamin consistent
+wordcloud(names(freq), freq, min.freq=25)#word cloud of words more than 25
+wordcloud(names(freq), freq, min.freq=20, scale=c(5, .1), colors=brewer.pal(6, "Dark2"))#add color
