@@ -1,0 +1,21 @@
+#Save an excel in required format before running the code
+#Edit the fixed words & required cells from excel as per requirement
+#13 Week Trend PPT#Convert dataframe in text/sentence)
+library(XLConnect)
+weektrend<-loadWorkbook("13WEEK.xlsx")#load excel in R#file name=13WEEK
+weektrend<-readWorksheet(weektrend,sheet=1)#read excel in R
+#function to frame in sentence using loop function for
+sentence<-function(x)
+{result=character()
+for(i in 1:nrow(x)){newread<-paste(x[[i,2]],"is at rank",x[[i,5]],",it has", x[[i,6]],"by",x[[i,7]],",")
+result=paste(result,newread,sep=" ")}
+return(print(result))}
+#pull result
+sentence(weektrend)
+
+sentence2<-function(x)
+{result=character()
+for(i in 1:nrow(x)){newread<-paste("Market Share of",x[[i,2]],"has",x[[i,10]],"from", x[[i,8]],"to",x[[i,9]])
+result=paste(result,newread,sep=" ")}
+return(print(result))}
+sentence2(weektrend)
