@@ -27,5 +27,5 @@ dailysalesindex<-loadWorkbook("dailysalesindex.xlsx",create=T)#create xlsx file
 createSheet(dailysalesindex,name="factual")#create sheet
 writeWorksheet(dailysalesindex, filename, sheet = "factual", startRow = 1, startCol = 1)#export df to xlsx
 saveWorkbook(dailysalesindex)#save sile
-library("rpivottable")# include pivot
+library("rpivotTable")# include pivot
 pivot<-rpivotTable(filename,rows=c("COMPANY","BRAND.NAME","BRAND.CATG","Region"),cols = c("CHNLNAME"),aggregatorName = "Sum",vals="DURATION")
